@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
-
 
 func failOnError(err error, msg string) {
 	if err != nil {
@@ -16,8 +17,8 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func publishMessage(message []byte) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func publishMessage(message []byte, brokerHost string) {
+	conn, err := amqp.Dial(brokerHost)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer func(conn *amqp.Connection) {
 		err := conn.Close()
@@ -61,11 +62,21 @@ func publishMessage(message []byte) {
 	log.Printf(" [x] Sent %s\n", message)
 }
 
+func getBrokerHost() string {
+	brokerHost, ok := os.LookupEnv("BROKER_HOST")
+	if !ok {
+		brokerHost = "amqp://guest:guest@localhost:5672/"
+	}
+	return brokerHost
+}
+
 func main() {
 	app := fiber.New()
+	app.Use(logger.New())
+	brokerHost := getBrokerHost()
 
 	app.Post("/message", func(c *fiber.Ctx) error {
-		publishMessage(c.Body())
+		publishMessage(c.Body(), brokerHost)
 		return c.SendString("ok")
 	})
 
