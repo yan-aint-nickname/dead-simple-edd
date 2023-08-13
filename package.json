@@ -4,8 +4,9 @@
   "description": "This project contains 2 backends `typescript` and `golang`. Golang project is a \"frontend\" with websocket and REST API endpoints for producting a message to rabbitmq. Consumer aka \"backend\" in this project written in typescript with nodejs as a runtime, which creates",
   "main": "consumer.ts",
   "scripts": {
-    "dev": "node consumer.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev-consumer": "node consumer.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev-server": "node server.js"
   },
   "author": "",
   "license": "ISC",
